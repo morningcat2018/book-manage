@@ -22,6 +22,8 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
+	db.SetMaxOpenConns(10) // 数据库建立连接的最大数目
+	db.SetMaxIdleConns(5)  // 连接池中的最大闲置连接数
 }
 
 type MysqlImpl struct{}
@@ -41,15 +43,26 @@ func (m MysqlImpl) SaveBook(book *entity.Book) {
 	fmt.Printf("insert success, the id is %d.\n", theID)
 }
 
-func (m MysqlImpl) DeleteBook(bookId string) {
-
+func (m MysqlImpl) DeleteBook(bookCode string) {
+	sqlStr := "delete from book where book_code = ?"
+	ret, err := db.Exec(sqlStr, bookCode)
+	if err != nil {
+		fmt.Printf("delete failed, err:%v\n", err)
+		return
+	}
+	n, err := ret.RowsAffected() // 操作影响的行数
+	if err != nil {
+		fmt.Printf("get RowsAffected failed, err:%v\n", err)
+		return
+	}
+	fmt.Printf("delete success, affected rows:%d\n", n)
 }
 
 func (m MysqlImpl) QueryById(bookCode string) *entity.Book {
-	sqlStr := "select book_code,book_name,author, publish_year from book where book_code=?"
+	sqlStr := "select book_code,book_name,author,publish_year from book where book_code=?"
 	var book entity.Book
 	// 非常重要：确保QueryRow之后调用Scan方法，否则持有的数据库链接不会被释放
-	err := db.QueryRow(sqlStr, 1).Scan(&book.BookCode, &book.BookName, &book.Author, &book.PublishYear)
+	err := db.QueryRow(sqlStr, bookCode).Scan(&book.BookCode, &book.BookName, &book.Author, &book.PublishYear)
 	if err != nil {
 		fmt.Printf("scan failed, err:%v\n", err)
 		return nil

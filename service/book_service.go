@@ -34,7 +34,7 @@ func DeleteBookByCode(dao dao.BookDao) {
 	fmt.Scanln(&code)
 	book1 := dao.QueryById(code)
 	if book1 == nil {
-		fmt.Errorf("not found")
+		fmt.Errorf("book not found")
 		return
 	}
 	dao.DeleteBook(code)
