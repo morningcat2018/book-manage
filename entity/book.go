@@ -16,6 +16,7 @@ CREATE TABLE `book` (
 )ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 */
 
+// 关于 tag : https://www.cnblogs.com/chnmig/p/11382390.html
 type Book struct {
 	Id          uint32 `db:"id"`
 	BookName    string `db:"book_name"`
