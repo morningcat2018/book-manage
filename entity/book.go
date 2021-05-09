@@ -17,10 +17,11 @@ CREATE TABLE `book` (
 */
 
 type Book struct {
-	BookName    string
-	BookCode    string
-	Author      string
-	PublishYear int
+	Id          uint32 `db:"id"`
+	BookName    string `db:"book_name"`
+	BookCode    string `db:"book_code"`
+	Author      string `db:"author"`
+	PublishYear int    `db:"publish_year"`
 }
 
 func (book *Book) GetBookString() string {

@@ -2,18 +2,18 @@ package mysql_impl
 
 import (
 	"book-manage/entity"
-	"database/sql"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/jmoiron/sqlx"
 )
 
-// 定义一个全局对象db
-var db *sql.DB
+// sql.DB 的超集
+var db *sqlx.DB
 
 func init() {
 	dsn := "root:@tcp(127.0.0.1:3306)/db_go_test?charset=utf8mb4&parseTime=True"
 	var err error
-	db, err = sql.Open("mysql", dsn)
+	db, err = sqlx.Open("mysql", dsn)
 	if err != nil {
 		panic(err)
 	}
@@ -29,6 +29,22 @@ func init() {
 type MysqlImpl struct{}
 
 func (m MysqlImpl) SaveBook(book *entity.Book) {
+	if book.Id != 0 {
+		// 更新
+		sqlStr := "update book set book_code=?,book_name=?,author=?,publish_year=? where id = ?"
+		ret, err := db.Exec(sqlStr, book.BookCode, book.BookName, book.Author, book.PublishYear, book.Id)
+		if err != nil {
+			fmt.Printf("update failed, err:%v\n", err)
+			return
+		}
+		n, err := ret.RowsAffected() // 操作影响的行数
+		if err != nil {
+			fmt.Printf("get RowsAffected failed, err:%v\n", err)
+			return
+		}
+		fmt.Printf("update success, affected rows:%d\n", n)
+	}
+
 	sqlStr := "insert into book(book_code,book_name,author, publish_year) values (?,?,?,?)"
 	ret, err := db.Exec(sqlStr, book.BookCode, book.BookName, book.Author, book.PublishYear)
 	if err != nil {
@@ -61,45 +77,42 @@ func (m MysqlImpl) DeleteBook(bookCode string) {
 func (m MysqlImpl) QueryById(bookCode string) *entity.Book {
 	sqlStr := "select book_code,book_name,author,publish_year from book where book_code=?"
 	var book entity.Book
-	// 非常重要：确保QueryRow之后调用Scan方法，否则持有的数据库链接不会被释放
-	err := db.QueryRow(sqlStr, bookCode).Scan(&book.BookCode, &book.BookName, &book.Author, &book.PublishYear)
+	err := db.Get(&book, sqlStr, bookCode)
 	if err != nil {
-		fmt.Printf("scan failed, err:%v\n", err)
+		fmt.Printf("get failed, err:%v\n", err)
 		return nil
 	}
 	return &book
 }
 
 func (m MysqlImpl) QueryListByName(bookName string) []entity.Book {
-	sqlStr := "select book_code,book_name,author, publish_year from book where book_name=?"
-	rows, err := db.Query(sqlStr, bookName)
-	return list(err, rows)
-}
-
-func (m MysqlImpl) QueryList() []entity.Book {
-	sqlStr := "select book_code,book_name,author, publish_year from book"
-	rows, err := db.Query(sqlStr)
-	return list(err, rows)
-}
-
-func list(err error, rows *sql.Rows) []entity.Book {
+	sqlStr := "select book_code,book_name,author,publish_year from book where book_name=?"
+	var booList []entity.Book
+	err := db.Select(&booList, sqlStr, bookName)
 	if err != nil {
 		fmt.Printf("query failed, err:%v\n", err)
 		return nil
 	}
-	// 非常重要：关闭rows释放持有的数据库链接
-	defer rows.Close()
-	// 循环读取结果集中的数据
-	var booList = make([]entity.Book, 5, 10)
-	// select count 优化
-	for rows.Next() {
-		var book entity.Book
-		err := rows.Scan(&book.BookCode, &book.BookName, &book.Author, &book.PublishYear)
-		booList = append(booList, book)
-		if err != nil {
-			fmt.Printf("scan failed, err:%v\n", err)
-			return nil
-		}
+	return booList
+}
+
+func (m MysqlImpl) QueryList() []entity.Book {
+	sqlStr := "select * from book"
+	var booList []entity.Book
+	err := db.Select(&booList, sqlStr)
+	if err != nil {
+		fmt.Printf("query failed, err:%v\n", err)
+		return nil
+	}
+	return booList
+}
+
+func list(sqlStr string, args ...interface{}) []entity.Book {
+	var booList []entity.Book
+	err := db.Select(&booList, sqlStr, args)
+	if err != nil {
+		fmt.Printf("query failed, err:%v\n", err)
+		return nil
 	}
 	return booList
 }
