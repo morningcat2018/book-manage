@@ -46,6 +46,9 @@ func PrintBookDefault(dao dao.BookDao) {
 
 func PrintBook(bookList []entity.Book) {
 	for _, v := range bookList {
+		if v.BookCode == "" {
+			continue
+		}
 		v.PrintBook()
 	}
 }

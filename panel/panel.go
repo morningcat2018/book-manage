@@ -1,13 +1,13 @@
 package panel
 
 import (
-	"book-manage/dao/mysql_impl"
+	"book-manage/dao/redis_impl"
 	"book-manage/service"
 	"fmt"
 )
 
 func DataPanel() {
-	var dao mysql_impl.MysqlImpl
+	var dao redis_impl.RedisImpl
 	for {
 		fmt.Print(getPanelString())
 		fmt.Print("请输入指令：")
