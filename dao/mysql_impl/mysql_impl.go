@@ -28,35 +28,37 @@ func init() {
 
 type MysqlImpl struct{}
 
-func (m MysqlImpl) SaveBook(book *entity.Book) {
+func (m MysqlImpl) SaveBook(book *entity.Book) int64 {
 	if book.Id != 0 {
 		// 更新
 		sqlStr := "update book set book_code=?,book_name=?,author=?,publish_year=? where id = ?"
 		ret, err := db.Exec(sqlStr, book.BookCode, book.BookName, book.Author, book.PublishYear, book.Id)
 		if err != nil {
 			fmt.Printf("update failed, err:%v\n", err)
-			return
+			return 0
 		}
 		n, err := ret.RowsAffected() // 操作影响的行数
 		if err != nil {
 			fmt.Printf("get RowsAffected failed, err:%v\n", err)
-			return
+			return 0
 		}
 		fmt.Printf("update success, affected rows:%d\n", n)
+		return n
 	}
 
 	sqlStr := "insert into book(book_code,book_name,author, publish_year) values (?,?,?,?)"
 	ret, err := db.Exec(sqlStr, book.BookCode, book.BookName, book.Author, book.PublishYear)
 	if err != nil {
 		fmt.Printf("insert failed, err:%v\n", err)
-		return
+		return 0
 	}
 	theID, err := ret.LastInsertId() // 新插入数据的id
 	if err != nil {
 		fmt.Printf("get lastinsert ID failed, err:%v\n", err)
-		return
+		return 0
 	}
 	fmt.Printf("insert success, the id is %d.\n", theID)
+	return theID
 }
 
 func (m MysqlImpl) DeleteBook(bookCode string) {
