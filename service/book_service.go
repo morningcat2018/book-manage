@@ -3,7 +3,6 @@ package service
 import (
 	"book-manage/dao/mysql_impl"
 	"book-manage/entity"
-	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
@@ -25,8 +24,7 @@ func BookAdd(context *gin.Context) {
 func BookGetDetail(context *gin.Context) {
 	code := context.Query("code")
 	book := bookDao.QueryById(code)
-	bs, _ := json.Marshal(book)
-	context.JSON(http.StatusOK, string(bs))
+	context.JSON(http.StatusOK, book)
 }
 
 func BookDeleteBookByCode(context *gin.Context) {
@@ -37,6 +35,5 @@ func BookDeleteBookByCode(context *gin.Context) {
 
 func BookGetList(context *gin.Context) {
 	bookList := bookDao.QueryList()
-	bs, _ := json.Marshal(bookList)
-	context.JSON(http.StatusOK, string(bs))
+	context.JSON(http.StatusOK, bookList)
 }

@@ -7,9 +7,9 @@ import (
 
 func Book(router *gin.Engine) {
 	// 最基本的用法
-	router.POST("/add", service.BookAdd)
-	router.POST("/update", service.BookAdd)
-	router.GET("/getDetail", service.BookGetDetail)
-	router.GET("/delete", service.BookDeleteBookByCode)
-	router.GET("/getList", service.BookGetList)
+	router.POST("/book/add", service.BookAdd)
+	router.POST("/book/update", service.BookAdd)
+	router.GET("/book/getDetail", service.BookGetDetail) // http://localhost:9090/book/getDetail?code=BN20001
+	router.GET("/book/delete", service.BookDeleteBookByCode)
+	router.GET("/book/getList", service.BookGetList) // http://localhost:9090/book/getList
 }
