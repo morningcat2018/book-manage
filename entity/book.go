@@ -18,11 +18,11 @@ CREATE TABLE `book` (
 
 // 关于 tag : https://www.cnblogs.com/chnmig/p/11382390.html
 type Book struct {
-	Id          uint32 `json:"id",db:"id"`
-	BookName    string `json:"name",db:"book_name"`
-	BookCode    string `json:"code",db:"book_code"`
-	Author      string `json:"author",db:"author"`
-	PublishYear int    `json:"year",db:"publish_year"`
+	Id          uint32 `json:"id" db:"id"`
+	BookName    string `json:"name" db:"book_name"`
+	BookCode    string `json:"code" db:"book_code"`
+	Author      string `json:"author" db:"author"`
+	PublishYear int    `json:"year" db:"publish_year"`
 }
 
 func (book *Book) GetBookString() string {
