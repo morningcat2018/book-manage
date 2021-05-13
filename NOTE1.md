@@ -12,7 +12,7 @@
 export GOPROXY=https://goproxy.cn
 
 /usr/local/Cellar/redis/6.0.10/bin
-
+./redis-server
 
 ```
 
