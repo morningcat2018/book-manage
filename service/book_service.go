@@ -1,51 +1,42 @@
 package service
 
 import (
-	"book-manage/dao"
+	"book-manage/dao/mysql_impl"
 	"book-manage/entity"
-	"fmt"
+	"encoding/json"
+	"github.com/gin-gonic/gin"
+	"net/http"
+	"strconv"
 )
 
-func InputBookInfo(dao dao.BookDao) {
-	var code, name, author string
-	var year int
-	fmt.Print("请输入书籍编码：")
-	fmt.Scanln(&code)
-	fmt.Print("请输入书名：")
-	fmt.Scanln(&name)
-	fmt.Print("请输入作者：")
-	fmt.Scanln(&author)
-	fmt.Print("请输入出版时间：")
-	fmt.Scanln(&year)
-	newBook := entity.NewBook(code, name, author, year)
-	dao.SaveBook(newBook)
+var bookDao mysql_impl.MysqlImpl
+
+func BookAdd(context *gin.Context) {
+	code := context.PostForm("code")
+	name := context.PostForm("name")
+	author := context.PostForm("author")
+	year := context.PostForm("year")
+	a, _ := strconv.Atoi(year)
+	newBook := entity.NewBook(code, name, author, a)
+	bookDao.SaveBook(newBook)
+	context.JSON(http.StatusOK, "add success")
 }
 
-func QueryBook(dao dao.BookDao) []entity.Book {
-	var name string
-	fmt.Print("请输入书名：")
-	fmt.Scanln(&name)
-	return dao.QueryListByName(name)
+func BookGetDetail(context *gin.Context) {
+	code := context.Query("code")
+	book := bookDao.QueryById(code)
+	bs, _ := json.Marshal(book)
+	context.JSON(http.StatusOK, string(bs))
 }
 
-func DeleteBookByCode(dao dao.BookDao) {
-	var code string
-	fmt.Print("请输入书籍编码：")
-	fmt.Scanln(&code)
-	book1 := dao.QueryById(code)
-	if book1 == nil {
-		fmt.Errorf("book not found")
-		return
-	}
-	dao.DeleteBook(code)
+func BookDeleteBookByCode(context *gin.Context) {
+	code := context.Query("code")
+	bookDao.DeleteBook(code)
+	context.JSON(http.StatusOK, "delete success")
 }
 
-func PrintBookDefault(dao dao.BookDao) {
-	PrintBook(dao.QueryList())
-}
-
-func PrintBook(bookList []entity.Book) {
-	for _, v := range bookList {
-		v.PrintBook()
-	}
+func BookGetList(context *gin.Context) {
+	bookList := bookDao.QueryList()
+	bs, _ := json.Marshal(bookList)
+	context.JSON(http.StatusOK, string(bs))
 }

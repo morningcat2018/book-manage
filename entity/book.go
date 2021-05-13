@@ -29,6 +29,7 @@ func (book *Book) GetBookString() string {
 	var str = book.BookCode + "\t" + book.BookName + "\t" + book.Author + "\t" + strconv.Itoa(book.PublishYear)
 	return str + "\n"
 }
+
 func (book *Book) PrintBook() {
 	fmt.Printf("编号：%s\t", book.BookCode)
 	fmt.Printf("书名：%s\t", book.BookName)

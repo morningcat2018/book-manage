@@ -10,6 +10,8 @@ func main() {
 	router := gin.Default()
 	// 绑定 home controller
 	controller.Home(router)
+	controller.Book(router)
+
 	// 绑定端口 9090
 	router.Run(":9090")
 }
