@@ -1,34 +1,35 @@
 package controller
 
 import (
-	"book-manage/service"
+	"book-manage/model"
+	"encoding/json"
 	"github.com/gin-gonic/gin"
+	"net/http"
 )
 
-func Book(router *gin.Engine) {
-	// 最基本的用法
-	router.POST("/book/add", service.BookAdd) // http://localhost:9090/book/add
-	router.POST("/book/update", service.BookAdd)
-	router.GET("/book/getDetail", service.BookGetDetail) // http://localhost:9090/book/getDetail?code=BN20001
-	router.GET("/book/delete", service.BookDeleteBookByCode)
-	router.GET("/book/getList", service.BookGetList) // http://localhost:9090/book/getList
+func AddBook(context *gin.Context) {
+	b, _ := context.GetRawData() // 从c.Request.Body读取请求数据
+	// 定义map或结构体
+	var m model.Book
+	// 反序列化
+	_ = json.Unmarshal(b, &m)
+	model.AddBook(&m)
+	context.JSON(http.StatusOK, "add or update success")
 }
 
-/**
-add
-{
-    "name": "golangAction",
-    "code": "BN20003",
-    "author": "mc3",
-    "year": 2023
+func GetBookDetail(context *gin.Context) {
+	code := context.Query("code")
+	book, _ := model.GetBookDetail(code)
+	context.JSON(http.StatusOK, book)
 }
 
-update
-{
-	"id": 1,
-    "name": "xxx",
-    "code": "xxx",
-    "author": "xxx",
-    "year": 2023
+func DeleteBook(context *gin.Context) {
+	code := context.Query("code")
+	model.DeleteBook(code)
+	context.JSON(http.StatusOK, "delete success")
 }
-*/
+
+func GetBookList(context *gin.Context) {
+	bookList, _ := model.GetBookList()
+	context.JSON(http.StatusOK, bookList)
+}

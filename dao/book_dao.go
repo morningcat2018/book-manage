@@ -1,21 +1,23 @@
 package dao
 
-import "book-manage/entity"
+import (
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/jinzhu/gorm"
+)
 
-type BookDao interface {
-	/**
-	新增 加 编辑
-	*/
-	SaveBook(book *entity.Book)
+var (
+	MysqlDb *gorm.DB
+)
 
-	/**
-	删除
-	*/
-	DeleteBook(bookId string)
+func InitMySQL() (err error) {
+	dsn := "root:@tcp(127.0.0.1:3306)/db_go_test?charset=utf8mb4&parseTime=True"
+	MysqlDb, err = gorm.Open("mysql", dsn)
+	if err != nil {
+		return
+	}
+	return MysqlDb.DB().Ping()
+}
 
-	QueryById(bookId string) *entity.Book
-
-	QueryListByName(bookName string) []entity.Book
-
-	QueryList() []entity.Book
+func Close() {
+	MysqlDb.Close()
 }
